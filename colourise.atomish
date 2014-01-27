@@ -38,8 +38,13 @@ reader_or = fn(text, pos, +readers,
         [true] +(curr_ret))
       ))
 reader_bits = {
+  rational:    fn(text, pos,
+    if(it: text [pos … -1] ~= /^[+-]?[0-9]+\\.[0-9]+/,
+      [true, [it [0], pos +(it [0] length), "rational"]],
+      [false]
+  )),
   integer:    fn(text, pos,
-    if(it: text [pos … -1] ~= /^([+-]?[0-9]+)/,
+    if(it: text [pos … -1] ~= /^(([+-]?[0-9]+)|(0x[0-9a-fA-F]+))/,
       [true, [it [0], pos +(it [0] length), "integer"]],
       [false]
   )),
@@ -53,9 +58,12 @@ i = reader_bits ["integer"]
 cell("i") setCell("activatable", false)
 o = reader_bits ["other"]
 cell("o") setCell("activatable", false)
+r = reader_bits ["rational"]
+cell("r") setCell("activatable", false)
 say(print(reader_bits ["integer"] ("34567111", 0)))
 say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i)))
 say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i, i)))
-say(print(reader_or("534534 wef 135656", 0, i, o)))
-say(print(reader_or("534534 wef 135656", 0, o, i)))
+say(print(reader_or("534534 wef 135656", 0, r, i, o)))
+say(print(reader_or("534534 wef 135656", 0, o, i, r)))
+say(print(reader_or("534534.9923 wef 135656", 0, r, o, i)))
 
