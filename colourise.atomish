@@ -1,0 +1,41 @@
+reader_and = fn(text, pos, +readers,
+  let(keep_going, true,
+      curr_pos,   pos,
+      curr_ret,   Array(),
+      readers each(reader,
+        if(curr_pos <(text length),
+          if(keep_going,
+            let(foo, reader(text, curr_pos),
+              if(foo [0],
+                curr_pos = foo [foo length -(1)] [1]
+                curr_ret = curr_ret +(foo [1 … -1]),
+                keep_going = false
+              ))
+          ),
+          keep_going = false
+        )
+      )
+      if(keep_going,
+        [true] +(curr_ret),
+        [false])
+      ))
+reader_bits = {
+  integer:    fn(text, pos,
+    if(it: text [pos … -1] ~= /^([+-]?[0-9]+)/,
+      [true, [it [0], pos +(it [0] length), "integer"]],
+      [false]
+  )),
+  other:      fn(text, pos,
+    if(it: text [pos … -1] ~= /^./,
+      [true, [it [0], pos +(it [0] length), "other"]],
+      [false]
+  ))
+}
+i = reader_bits ["integer"]
+cell("i") setCell("activatable", false)
+o = reader_bits ["other"]
+cell("o") setCell("activatable", false)
+say(print(reader_bits ["integer"] ("34567111", 0)))
+say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i)))
+say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i, i)))
+
