@@ -66,11 +66,24 @@ o = reader_bits ["other"]
 r = reader_bits ["rational"]
 setCell("&", wrapped_and)
 setCell("∨", wrapped_or)
-say(print(reader_bits ["integer"] ("34567111", 0)))
+#.say(print(reader_bits ["integer"] ("34567111", 0)))
 say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i)))
 say(print(reader_and("534534 wef 135656", 0, i, o, o, o, o, o, i, i)))
 say(print(reader_or("534534 wef 135656", 0, r, i, o)))
-say(print(reader_or("534534 wef 135656", 0, o, i, r)))
-say(print(reader_or("534534.9923 wef 135656", 0, r, o, i)))
-say(print(reader_and("534534.9923 wef 135656", 0, ∨(r, o, i))))
-say(print(reader_and("534534.9923 wef 135656", 0, ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r), o)))
+say(print(reader_or("534534 wef 135656", 0, o, i, r))) .
+#;say(print(reader_or("534534.9923 wef 135656", 0, r, o, i)))
+#;say(print(reader_and("534534.9923 wef 135656", 0, ∨(r, o, i))))
+the_stuff = reader_and("534534.9923 wef 135656", 0, ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r), &(o, o, o, o, o, ∨(r, i)))
+say(print(the_stuff))
+classes = {
+  integer: "vi",
+  rational: "vr",
+  other:    "none"
+}
+htmlescape = fn(text,
+  text)
+colourize = fn(stream,
+  stream map(bit,
+    "<div class=\"#{classes [bit [2]]}\">#{htmlescape(bit [0])}</div>"
+  ) join)
+say(colourize(the_stuff [1 … -1]))
