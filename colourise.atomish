@@ -44,6 +44,12 @@ wrapped_and = fnx(+readers,
 wrapped_or = fnx(+readers,
   eval(unquote(''(fnx(text, pos,
     reader_or(text, pos, `*(readers)))))))
+lit = fnx(the_literal,
+  fnx(text, pos,
+   if(text [pos … (pos +(the_literal length))] == the_literal,
+     [true, [the_literal, pos +(the_literal length), "literal"a]],
+     [false])
+  ))
 reader_bits = {
   rational:    fnx(text, pos,
     if(it: text [pos … -1] ~= /^[+-]?[0-9]+\\.[0-9]+/,
@@ -54,6 +60,13 @@ reader_bits = {
     if(it: text [pos … -1] ~= /^(([+-]?[0-9]+)|(0x[0-9a-fA-F]+))/,
       [true, [it [0], pos +(it [0] length), "integer"]],
       [false]
+  )),
+  string:     fnx(text, pos,
+    let(quote,        lit(#["]),
+        square_start, lit("#["),
+        square_end,   lit("]"),
+        parse, ∨(&(quote, *(∨(quote_text, quote_escape)), quote), &(square_start, ∨(square_text, square_escape), square_end)),
+        parse(text, pos)
   )),
   other:      fnx(text, pos,
     if(it: text [pos … -1] ~= /^./,
@@ -76,14 +89,21 @@ say(print(reader_or("534534 wef 135656", 0, o, i, r))) .
 the_stuff = reader_and("534534.9923 wef 135656", 0, ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r),  ∨(i, o, r), &(o, o, o, o, o, ∨(r, i)))
 say(print(the_stuff))
 classes = {
-  integer: "vi",
-  rational: "vr",
-  other:    "none"
+  integer:        "vi",
+  rational:       "vr",
+  other:          "none",
+  string_content: "vs"
 }
 htmlescape = fn(text,
   text)
+linkify = fn(raw,
+  if(link?(raw),
+    "<a href=\"#{raw}\">#{htmlescape(raw)}</a>",
+    htmlescape(raw)))
 colourize = fn(stream,
   stream map(bit,
-    "<div class=\"#{classes [bit [2]]}\">#{htmlescape(bit [0])}</div>"
+    case(bit [2],
+      "string_content", "<div class=\"#{classes [bit [2]]}\">#{linkify(bit [0])}</div>",
+                        "<div class=\"#{classes [bit [2]]}\">#{htmlescape(bit [0])}</div>")
   ) join)
 say(colourize(the_stuff [1 … -1]))
